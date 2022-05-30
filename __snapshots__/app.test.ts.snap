@@ -1,47 +1,47 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+export const snapshot = {};
 
-exports[`snapshot 1`] = `
-Object {
-  "Parameters": Object {
-    "BootstrapVersion": Object {
-      "Default": "/cdk-bootstrap/hnb659fds/version",
-      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
-      "Type": "AWS::SSM::Parameter::Value<String>",
+snapshot[`snapshot 1`] = `
+{
+  Parameters: {
+    BootstrapVersion: {
+      Default: "/cdk-bootstrap/hnb659fds/version",
+      Description: "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      Type: "AWS::SSM::Parameter::Value<String>",
     },
   },
-  "Resources": Object {
-    "MyLogGroup5C0DAD85": Object {
-      "DeletionPolicy": "Retain",
-      "Properties": Object {
-        "RetentionInDays": 731,
+  Resources: {
+    MyLogGroup5C0DAD85: {
+      DeletionPolicy: "Retain",
+      Properties: {
+        RetentionInDays: 731,
       },
-      "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Retain",
+      Type: "AWS::Logs::LogGroup",
+      UpdateReplacePolicy: "Retain",
     },
   },
-  "Rules": Object {
-    "CheckBootstrapVersion": Object {
-      "Assertions": Array [
-        Object {
-          "Assert": Object {
-            "Fn::Not": Array [
-              Object {
-                "Fn::Contains": Array [
-                  Array [
+  Rules: {
+    CheckBootstrapVersion: {
+      Assertions: [
+        {
+          Assert: {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
                     "1",
                     "2",
                     "3",
                     "4",
                     "5",
                   ],
-                  Object {
-                    "Ref": "BootstrapVersion",
+                  {
+                    Ref: "BootstrapVersion",
                   },
                 ],
               },
             ],
           },
-          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+          AssertDescription: "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
         },
       ],
     },

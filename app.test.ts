@@ -1,6 +1,7 @@
-import { stack } from "./app";
-import { Template } from "aws-cdk-lib/assertions";
+import { assertSnapshot } from "https://deno.land/std@0.141.0/testing/snapshot.ts";
+import assertions from "https://esm.sh/aws-cdk-lib@2.26.0/assertions";
+import { stack } from "./app.ts";
 
-test("snapshot", () => {
-  expect(Template.fromStack(stack).toJSON()).toMatchSnapshot();
+Deno.test("snapshot", async (t) => {
+  await assertSnapshot(t, assertions.Template.fromStack(stack).toJSON());
 });
