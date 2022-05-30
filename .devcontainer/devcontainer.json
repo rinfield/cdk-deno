@@ -1,0 +1,7 @@
+{
+    "name": "cdk-deno",
+    "dockerFile": "Dockerfile",
+    "context": ".",
+    "extensions": [],
+    "settings": {}
+}
