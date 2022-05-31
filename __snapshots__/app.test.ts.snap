@@ -2,6 +2,85 @@ export const snapshot = {};
 
 snapshot[`snapshot 1`] = `
 {
+  Mappings: {
+    awscdkawskinesisfirehoseCidrBlocks: {
+      "af-south-1": {
+        FirehoseCidrBlock: "13.244.121.224/27",
+      },
+      "ap-east-1": {
+        FirehoseCidrBlock: "18.162.221.32/27",
+      },
+      "ap-northeast-1": {
+        FirehoseCidrBlock: "13.113.196.224/27",
+      },
+      "ap-northeast-2": {
+        FirehoseCidrBlock: "13.209.1.64/27",
+      },
+      "ap-northeast-3": {
+        FirehoseCidrBlock: "13.208.177.192/27",
+      },
+      "ap-south-1": {
+        FirehoseCidrBlock: "13.232.67.32/27",
+      },
+      "ap-southeast-1": {
+        FirehoseCidrBlock: "13.228.64.192/27",
+      },
+      "ap-southeast-2": {
+        FirehoseCidrBlock: "13.210.67.224/27",
+      },
+      "ca-central-1": {
+        FirehoseCidrBlock: "35.183.92.128/27",
+      },
+      "cn-north-1": {
+        FirehoseCidrBlock: "52.81.151.32/27",
+      },
+      "cn-northwest-1": {
+        FirehoseCidrBlock: "161.189.23.64/27",
+      },
+      "eu-central-1": {
+        FirehoseCidrBlock: "35.158.127.160/27",
+      },
+      "eu-north-1": {
+        FirehoseCidrBlock: "13.53.63.224/27",
+      },
+      "eu-south-1": {
+        FirehoseCidrBlock: "15.161.135.128/27",
+      },
+      "eu-west-1": {
+        FirehoseCidrBlock: "52.19.239.192/27",
+      },
+      "eu-west-2": {
+        FirehoseCidrBlock: "18.130.1.96/27",
+      },
+      "eu-west-3": {
+        FirehoseCidrBlock: "35.180.1.96/27",
+      },
+      "me-south-1": {
+        FirehoseCidrBlock: "15.185.91.0/27",
+      },
+      "sa-east-1": {
+        FirehoseCidrBlock: "18.228.1.128/27",
+      },
+      "us-east-1": {
+        FirehoseCidrBlock: "52.70.63.192/27",
+      },
+      "us-east-2": {
+        FirehoseCidrBlock: "13.58.135.96/27",
+      },
+      "us-gov-east-1": {
+        FirehoseCidrBlock: "18.253.138.96/27",
+      },
+      "us-gov-west-1": {
+        FirehoseCidrBlock: "52.61.204.160/27",
+      },
+      "us-west-1": {
+        FirehoseCidrBlock: "13.57.135.192/27",
+      },
+      "us-west-2": {
+        FirehoseCidrBlock: "52.89.255.224/27",
+      },
+    },
+  },
   Parameters: {
     BootstrapVersion: {
       Default: "/cdk-bootstrap/hnb659fds/version",
@@ -10,6 +89,161 @@ snapshot[`snapshot 1`] = `
     },
   },
   Resources: {
+    FirehoseDestBucket5161CA67: {
+      DeletionPolicy: "Retain",
+      Type: "AWS::S3::Bucket",
+      UpdateReplacePolicy: "Retain",
+    },
+    FirehoseStream85DFF016: {
+      DependsOn: [
+        "FirehoseStreamS3DestinationRoleDefaultPolicyD12DE613",
+      ],
+      Properties: {
+        DeliveryStreamType: "DirectPut",
+        ExtendedS3DestinationConfiguration: {
+          BucketARN: {
+            "Fn::GetAtt": [
+              "FirehoseDestBucket5161CA67",
+              "Arn",
+            ],
+          },
+          CloudWatchLoggingOptions: {
+            Enabled: true,
+            LogGroupName: {
+              Ref: "FirehoseStreamLogGroup9325AD6F",
+            },
+            LogStreamName: {
+              Ref: "FirehoseStreamLogGroupS3Destination159E9820",
+            },
+          },
+          RoleARN: {
+            "Fn::GetAtt": [
+              "FirehoseStreamS3DestinationRole5FDC3E58",
+              "Arn",
+            ],
+          },
+        },
+      },
+      Type: "AWS::KinesisFirehose::DeliveryStream",
+    },
+    FirehoseStreamLogGroup9325AD6F: {
+      DeletionPolicy: "Retain",
+      Properties: {
+        RetentionInDays: 731,
+      },
+      Type: "AWS::Logs::LogGroup",
+      UpdateReplacePolicy: "Retain",
+    },
+    FirehoseStreamLogGroupS3Destination159E9820: {
+      DeletionPolicy: "Retain",
+      Properties: {
+        LogGroupName: {
+          Ref: "FirehoseStreamLogGroup9325AD6F",
+        },
+      },
+      Type: "AWS::Logs::LogStream",
+      UpdateReplacePolicy: "Retain",
+    },
+    FirehoseStreamS3DestinationRole5FDC3E58: {
+      Properties: {
+        AssumeRolePolicyDocument: {
+          Statement: [
+            {
+              Action: "sts:AssumeRole",
+              Effect: "Allow",
+              Principal: {
+                Service: "firehose.amazonaws.com",
+              },
+            },
+          ],
+          Version: "2012-10-17",
+        },
+      },
+      Type: "AWS::IAM::Role",
+    },
+    FirehoseStreamS3DestinationRoleDefaultPolicyD12DE613: {
+      Properties: {
+        PolicyDocument: {
+          Statement: [
+            {
+              Action: [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*",
+              ],
+              Effect: "Allow",
+              Resource: [
+                {
+                  "Fn::GetAtt": [
+                    "FirehoseDestBucket5161CA67",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "FirehoseDestBucket5161CA67",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              Action: [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+              ],
+              Effect: "Allow",
+              Resource: {
+                "Fn::GetAtt": [
+                  "FirehoseStreamLogGroup9325AD6F",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          Version: "2012-10-17",
+        },
+        PolicyName: "FirehoseStreamS3DestinationRoleDefaultPolicyD12DE613",
+        Roles: [
+          {
+            Ref: "FirehoseStreamS3DestinationRole5FDC3E58",
+          },
+        ],
+      },
+      Type: "AWS::IAM::Policy",
+    },
+    FirehoseStreamServiceRole98797615: {
+      Properties: {
+        AssumeRolePolicyDocument: {
+          Statement: [
+            {
+              Action: "sts:AssumeRole",
+              Effect: "Allow",
+              Principal: {
+                Service: "firehose.amazonaws.com",
+              },
+            },
+          ],
+          Version: "2012-10-17",
+        },
+      },
+      Type: "AWS::IAM::Role",
+    },
     MyLogGroup5C0DAD85: {
       DeletionPolicy: "Retain",
       Properties: {
