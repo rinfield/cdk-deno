@@ -1,6 +1,7 @@
 import awsCdkLib from "https://esm.sh/aws-cdk-lib@2.26.0?deps=constructs@10.1.23";
 export const cdk = awsCdkLib;
-export const { aws_s3: s3, aws_logs: logs } = awsCdkLib;
+export const { aws_s3: s3, aws_logs: logs, aws_lambda_nodejs: lambdaNodejs } =
+  awsCdkLib;
 
 export { default as firehose } from "https://esm.sh/@aws-cdk/aws-kinesisfirehose-alpha@2.26.0-alpha.0?deps=constructs@10.1.23";
 export { default as firehoseTo } from "https://esm.sh/@aws-cdk/aws-kinesisfirehose-destinations-alpha@2.26.0-alpha.0?deps=constructs@10.1.23";
