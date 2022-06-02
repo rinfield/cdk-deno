@@ -1,5 +1,6 @@
 {
   "imports": {
-    "/v85/fsevents@2.3.2/es2022/fsevents.js": "./empty.js"
+    "/v85/fsevents@2.3.2/es2022/fsevents.js": "./empty.js",
+    "https://esm.sh/v85/fsevents@2.3.2/deno/fsevents.js": "./empty.js"
   }
 }
