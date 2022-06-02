@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "/v85/fsevents@2.3.2/es2022/fsevents.js": "./empty.js"
+  }
+}
