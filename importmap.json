@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "https://esm.sh/v85/fsevents@2.3.2/deno/fsevents.js": "./fsevents-stub.js"
+  }
+}
