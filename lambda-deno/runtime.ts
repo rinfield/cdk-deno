@@ -1,87 +1,92 @@
-import * as lib from "./lib.ts";
-import { LambdaRuntimeApi } from "./runtime_api.ts";
+import * as runtimeType from "./types.ts";
+import { InvocationContext, LambdaRuntimeApi } from "./runtime_api.ts";
 
-const reservedEnvVarNames = [
-  "_HANDLER",
-  "AWS_REGION",
-  "AWS_LAMBDA_FUNCTION_NAME",
-  "AWS_LAMBDA_FUNCTION_MEMORY_SIZE",
-  "AWS_LAMBDA_FUNCTION_VERSION",
-  "AWS_LAMBDA_INITIALIZATION_TYPE",
-  "AWS_LAMBDA_LOG_GROUP_NAME",
-  "AWS_LAMBDA_LOG_STREAM_NAME",
-  lib.runtimeApiEnvVarName,
-  "LAMBDA_TASK_ROOT",
-  "LAMBDA_RUNTIME_DIR",
-  "TZ",
-] as const;
-
-type ReservedEnv = {
-  [key in typeof reservedEnvVarNames[number]]: string;
-};
-
-interface LambdaRuntimeContext {
-  env: ReservedEnv;
+interface RuntimeContext {
+  env: runtimeType.RuntimeEnvVar;
 }
 
 export class LambdaRuntime {
   static async initialize(): Promise<LambdaRuntime> {
     try {
-      return new LambdaRuntime(LambdaRuntime.getContext());
+      return new LambdaRuntime(LambdaRuntime.getRuntimeContext());
     } catch (e) {
       await LambdaRuntimeApi.initializationError(e);
-      throw e;
+      Deno.exit(1);
     }
   }
 
-  private constructor(private runtimeContext: LambdaRuntimeContext) {
+  private constructor(private runtimeContext: RuntimeContext) {
   }
 
-  async run(handler: (event: unknown, context: unknown) => Promise<unknown>) {
-    for await (const invocationEvent of this.nextEvent()) {
+  async run(handler: runtimeType.Handler) {
+    for await (const invocationContext of this.invocations()) {
       try {
         const response = await handler(
-          invocationEvent.event,
-          this.runtimeContext,
+          invocationContext.event,
+          this.newHandlerContext(invocationContext),
+          undefined as any,
         );
+
         await LambdaRuntimeApi.invocationResponse(
-          invocationEvent.awsRequestId,
+          invocationContext.awsRequestId,
           response,
         );
       } catch (e) {
-        await LambdaRuntimeApi.invocationError(invocationEvent.awsRequestId, e);
+        await LambdaRuntimeApi.invocationError(
+          invocationContext.awsRequestId,
+          e,
+        );
       }
     }
   }
 
-  private static getContext(): LambdaRuntimeContext {
+  private static getRuntimeContext(): RuntimeContext {
     const env = Object.fromEntries(
-      reservedEnvVarNames.map((k) => {
+      runtimeType.ENV_VAR_NAMES.map((k) => {
         const v = Deno.env.get(k);
         if (!v) throw new Error(`Env '${k}' is not provided`);
         return [k, v];
       }),
-    ) as ReservedEnv;
+    ) as runtimeType.RuntimeEnvVar;
     return { env };
   }
 
-  private async *nextEvent() {
+  private async *invocations() {
     while (true) {
-      console.log("event loop..."); // XXX
-      try {
-        yield LambdaRuntimeApi.nextInvocation();
-      } catch (e) {
-        console.error(e);
-        try {
-          // await LambdaRuntimeApi.initializationError(e);
-        } catch (e2) {
-          console.error("runtime error recovering failed.");
-          console.error("first error:");
-          console.error(e);
-          console.error("error on recovery:");
-          console.error(e2);
-        }
-      }
+      yield LambdaRuntimeApi.nextInvocation();
     }
+  }
+
+  private newHandlerContext(
+    invocationEvent: InvocationContext,
+  ): runtimeType.Context {
+    const {
+      AWS_LAMBDA_FUNCTION_NAME: functionName,
+      AWS_LAMBDA_FUNCTION_VERSION: functionVersion,
+      AWS_LAMBDA_FUNCTION_MEMORY_SIZE: memoryLimitInMB,
+      AWS_LAMBDA_LOG_GROUP_NAME: logGroupName,
+      AWS_LAMBDA_LOG_STREAM_NAME: logStreamName,
+    } = this.runtimeContext.env;
+    const { awsRequestId, invokedFunctionArn, deadlineMs } = invocationEvent;
+
+    return {
+      functionName,
+      functionVersion,
+      memoryLimitInMB,
+      logGroupName,
+      logStreamName,
+
+      awsRequestId,
+      invokedFunctionArn,
+      getRemainingTimeInMillis: () => deadlineMs - Date.now(),
+      clientContext: undefined, // TODO
+      identity: undefined, // TODO
+
+      callbackWaitsForEmptyEventLoop: false,
+
+      done: undefined as any,
+      fail: undefined as any,
+      succeed: undefined as any,
+    };
   }
 }

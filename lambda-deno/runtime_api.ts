@@ -1,127 +1,90 @@
-import * as lib from "./lib.ts";
+import * as runtimeType from "./types.ts";
 
-interface InvocationContext {
-  awsRequestId: string;
+export interface InvocationContext {
   event: unknown;
+
+  awsRequestId: string;
+  invokedFunctionArn: string;
+  deadlineMs: number;
 }
 
-const errorTypeHeaderName = "Lambda-Runtime-Function-Error-Type";
-interface ErrorRequestHeader {
-  [errorTypeHeaderName]:
-    | InitializationErrorType
-    | InvocationErrorType;
-}
-
-type InitializationErrorType =
-  | "Runtime.NoSuchHandler"
-  | "Runtime.APIKeyNotFound"
-  | "Runtime.ConfigInvalid"
-  | "Runtime.UnknownReason";
-type InvocationErrorType =
-  | "Runtime.NoSuchHandler"
-  | "Runtime.APIKeyNotFound"
-  | "Runtime.ConfigInvalid"
-  | "Runtime.UnknownReason";
-
-interface ErrorRequest {
-  errorMessage: string;
-  errorType: string;
-  stackTrace: string[];
-}
-
-type InitializationErrorResponseCodes =
-  | 202 // Accepted
-  | 403 // Forbidden
-  | 500; // Container error. Non-recoverable state. Runtime should exit promptly.
-type InvocationErrorResponseCodes =
-  | 202 // Accepted
-  | 400 // Bad Request
-  | 403 // Forbidden
-  | 500; // Container error. Non-recoverable state. Runtime should exit promptly.
-
-type HttpMethod = "GET" | "POST";
 interface LambdaRuntimeApiResquest {
   headers?: HeadersInit;
   body?: BodyInit;
 }
 
-const nextInvocationResponseHeaderNames = [
-  "Lambda-Runtime-Aws-Request-Id",
-  "Lambda-Runtime-Deadline-Ms",
-  "Lambda-Runtime-Invoked-Function-Arn",
-  "Lambda-Runtime-Trace-Id",
-  "Lambda-Runtime-Client-Context",
-  "Lambda-Runtime-Cognito-Identity",
-] as const;
-type NextInvocationResponseHeaders = {
-  [key in typeof nextInvocationResponseHeaderNames[number]]: string;
-};
-
 export class LambdaRuntimeApi {
   static async initializationError(e: Error) {
     const path = "/runtime/init/error";
-    const errorType: InitializationErrorType = "Runtime.UnknownReason";
-    const response = await this.callApi("POST", path, {
+    const errorType: runtimeType.InitializationErrorType =
+      "Runtime.UnknownReason";
+    const response = await this.callRuntimeApi("POST", path, {
       body: JSON.stringify(this.toErrorRequest(e)),
       headers: {
-        [errorTypeHeaderName]: errorType,
+        [runtimeType.REQUEST_HEADER_FUNCTION_ERROR_TYPE]: errorType,
       },
     });
-    await LambdaRuntimeApi.handleErrorApiResponse(response);
+    await LambdaRuntimeApi.onOk(response);
   }
 
   static async nextInvocation(): Promise<InvocationContext> {
-    const response = await this.callApi("GET", "/runtime/invocation/next");
+    const response = await this.callRuntimeApi(
+      "GET",
+      "/runtime/invocation/next",
+    );
 
-    await this.handleApiResponse(response);
+    return await this.onOk(response, async () => {
+      const responseHeaders = Object.fromEntries(
+        runtimeType.NEXT_API_RESPONSE_HEADERS.map((
+          envName,
+        ) => [envName, response.headers.get(envName)]),
+      ) as runtimeType.NextApiResponseHeaders;
 
-    const headers = Object.fromEntries(
-      nextInvocationResponseHeaderNames.map((
-        envName,
-      ) => [envName, response.headers.get(envName)]),
-    ) as NextInvocationResponseHeaders;
-
-    return {
-      awsRequestId: headers["Lambda-Runtime-Aws-Request-Id"],
-      event: await response.json(),
-    };
+      return {
+        awsRequestId: responseHeaders["Lambda-Runtime-Aws-Request-Id"],
+        invokedFunctionArn:
+          responseHeaders["Lambda-Runtime-Invoked-Function-Arn"],
+        deadlineMs: parseInt(responseHeaders["Lambda-Runtime-Deadline-Ms"], 10),
+        event: await response.json(),
+      };
+    });
   }
 
   static async invocationResponse(
     awsRequestId: string,
     handlerResponse: unknown,
   ) {
-    const response = await this.callApi(
+    const response = await this.callRuntimeApi(
       "POST",
       `/runtime/invocation/${awsRequestId}/response`,
       {
         body: JSON.stringify(handlerResponse),
       },
     );
-    this.handleApiResponse(response);
+    await this.onOk(response);
   }
 
   static async invocationError(awsRequestId: string, e: Error) {
     const path = `/runtime/invocation/${awsRequestId}/error`;
-    const errorType: InitializationErrorType = "Runtime.UnknownReason";
-    const response = await this.callApi("POST", path, {
+    const errorType: runtimeType.InitializationErrorType =
+      "Runtime.UnknownReason";
+    const response = await this.callRuntimeApi("POST", path, {
       body: JSON.stringify(this.toErrorRequest(e)),
       headers: {
-        [errorTypeHeaderName]: errorType,
+        [runtimeType.REQUEST_HEADER_FUNCTION_ERROR_TYPE]: errorType,
       },
     });
-    await LambdaRuntimeApi.handleErrorApiResponse(response);
+    await LambdaRuntimeApi.onOk(response);
   }
 
-  private static callApi(
-    method: HttpMethod,
+  private static callRuntimeApi(
+    method: runtimeType.HttpMethod,
     path: string,
     options?: LambdaRuntimeApiResquest,
   ) {
     const url = `http://${
-      Deno.env.get(lib.runtimeApiEnvVarName)
+      Deno.env.get(runtimeType.ENV_VAR_NAME_RUNTIME_API)
     }/2018-06-01${path}`;
-    console.log(url); // XXX
     return fetch(url, {
       method,
       headers: options?.headers,
@@ -129,7 +92,7 @@ export class LambdaRuntimeApi {
     });
   }
 
-  private static toErrorRequest(e: Error): ErrorRequest {
+  private static toErrorRequest(e: Error): runtimeType.ErrorRequest {
     return {
       errorMessage: e.message,
       errorType: e.name,
@@ -137,23 +100,28 @@ export class LambdaRuntimeApi {
     };
   }
 
-  private static async handleApiResponse(response: Response) {
+  private static async onOk<T>(
+    response: Response,
+    f?: () => Promise<T>,
+  ): Promise<T> {
     if (response.ok) {
-      return;
+      return f ? await f() : undefined as any;
     }
-    console.error(
+
+    if (response.status === 500) {
+      console.error(
+        `[${response.url}] shutting down lambda runtime since Runtime API responds container error & non-recoverable state.`,
+      );
+      this.exitRuntime();
+    }
+
+    throw new Error(
       `[${response.url}] => ${response.status} ${response.statusText} ${await response
         .text()}`,
     );
   }
 
-  private static async handleErrorApiResponse(response: Response) {
-    await this.handleApiResponse(response);
-    if (response.status === 500) {
-      console.error(
-        `[${response.url}] shutting down lambda runtime since Runtime API responds container error & non-recoverable state.`,
-      );
-      Deno.exit(1);
-    }
+  static exitRuntime(): never {
+    Deno.exit(1);
   }
 }

@@ -1,0 +1,16 @@
+import { RuntimeEnvVar } from "./types.ts";
+
+export const defaultRuntimeEnvVars: RuntimeEnvVar = {
+  AWS_LAMBDA_FUNCTION_MEMORY_SIZE: "1111",
+  AWS_LAMBDA_FUNCTION_NAME: "TEST_LAMBDA_FUNCTION_NAME",
+  AWS_LAMBDA_FUNCTION_VERSION: "$TEST",
+  AWS_LAMBDA_INITIALIZATION_TYPE: "test-type",
+  AWS_LAMBDA_LOG_GROUP_NAME: "/awa/lambda/TEST_LAMBDA_FUNCTION_NAME",
+  AWS_LAMBDA_LOG_STREAM_NAME: "[$TEST]12345678901234567890123456789012",
+  AWS_LAMBDA_RUNTIME_API: "127.0.0.1:9001",
+  AWS_REGION: "test-region",
+  LAMBDA_RUNTIME_DIR: "/var/runtime/test",
+  LAMBDA_TASK_ROOT: "/var/task/test",
+  TZ: "UTC",
+  _HANDLER: "test.handler",
+} as const;
