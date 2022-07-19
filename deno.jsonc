@@ -1,0 +1,5 @@
+{
+  "tasks": {
+    "ci": "deno fmt --check && deno lint && deno test --allow-env --allow-read=__snapshots__,/tmp --allow-write=__snapshots__,/tmp"
+  }
+}
