@@ -1,6 +1,6 @@
-# Welcome to your CDK TypeScript project
+# Welcome to CDK Deno project
 
-This is a blank project for CDK development with TypeScript.
+This is a sample project for CDK development with Deno.
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
