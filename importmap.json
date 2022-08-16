@@ -1,0 +1,8 @@
+{
+  "imports": {
+    "constructs": "https://esm.sh/constructs@10.1.49",
+    "aws-cdk-lib": "https://esm.sh/aws-cdk-lib@2.32.1?external=constructs",
+    "aws-kinesisfirehose-alpha": "https://esm.sh/@aws-cdk/aws-kinesisfirehose-alpha@2.32.1-alpha.0?external=constructs,aws-cdk-lib",
+    "aws-kinesisfirehose-destinations-alpha": "https://esm.sh/@aws-cdk/aws-kinesisfirehose-destinations-alpha@2.32.1-alpha.0?external=constructs,aws-cdk-lib"
+  }
+}
