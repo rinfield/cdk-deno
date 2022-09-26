@@ -8,5 +8,5 @@ export { default as firehose } from "aws-kinesisfirehose-alpha";
 export { default as firehoseTo } from "aws-kinesisfirehose-destinations-alpha";
 
 // test
-export { assertSnapshot } from "https://deno.land/std@0.150.0/testing/snapshot.ts";
+export { assertSnapshot } from "testing/snapshot";
 export const { Template } = awsCdkLib.assertions;

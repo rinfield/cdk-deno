@@ -11,7 +11,7 @@ RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NOWARNINGS=yes \
         ca-certificates git less vim jq curl wget tar zip unzip file procps htop ncdu fish > /dev/null \
     && chsh --shell /usr/bin/fish
 
-RUN npm install --silent --global aws-cdk@2.32.1
+RUN npm install --silent --global aws-cdk@2.41.0
 
 RUN curl --fail --silent --show-error --location https://deno.land/install.sh | sh > /dev/null 2>&1 \
     && ln --symbolic ~/.deno/bin/deno /usr/local/bin \

@@ -1,5 +1,5 @@
 {
-  "app": "deno run --allow-all --import-map=importmap.json app.ts",
+  "app": "deno run --allow-all --import-map=importmap.json --unstable app.ts",
   "watch": {
     "include": [
       "**"
