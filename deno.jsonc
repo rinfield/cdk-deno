@@ -1,8 +1,8 @@
 {
   "tasks": {
     "ci": "deno fmt --check && deno lint && deno test --import-map=importmap.json --allow-env --allow-read=__snapshots__,/tmp --allow-write=__snapshots__,/tmp",
-    // DOES NOT WORK NOW...
-    "cdk-cli-deno": "deno run --allow-all --import-map=cdk-cli-deno/importmap.json --no-check cdk-cli-deno/cdk.ts"
+    "cdk": "deno run --allow-all npm:aws-cdk --",
+    "cdk-app": "deno run --allow-all --import-map=importmap.json app.ts"
   },
   "lint": {
     "files": {

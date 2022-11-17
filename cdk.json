@@ -1,5 +1,5 @@
 {
-  "app": "deno run --allow-all --import-map=importmap.json --unstable app.ts",
+  "app": "deno task cdk-app",
   "watch": {
     "include": [
       "**"

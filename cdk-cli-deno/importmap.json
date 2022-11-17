@@ -1,5 +1,0 @@
-{
-  "imports": {
-    "fsevents": "./fsevents-stub.js"
-  }
-}
