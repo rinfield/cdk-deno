@@ -1,9 +1,0 @@
-{
-  "imports": {
-    "constructs": "npm:constructs@10.1.83",
-    "aws-cdk-lib": "npm:aws-cdk-lib@2.50.0",
-    "aws-kinesisfirehose-alpha": "npm:@aws-cdk/aws-kinesisfirehose-alpha@2.50.0-alpha.0",
-    "aws-kinesisfirehose-destinations-alpha": "npm:@aws-cdk/aws-kinesisfirehose-destinations-alpha@2.50.0-alpha.0",
-    "testing/snapshot": "https://deno.land/std@0.165.0/testing/snapshot.ts"
-  }
-}
