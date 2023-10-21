@@ -31,6 +31,9 @@ snapshot[`snapshot 1`] = `
       "ap-southeast-3": {
         FirehoseCidrBlock: "108.136.221.64/27",
       },
+      "ap-southeast-4": {
+        FirehoseCidrBlock: "16.50.161.128/27",
+      },
       "ca-central-1": {
         FirehoseCidrBlock: "35.183.92.128/27",
       },
@@ -57,6 +60,12 @@ snapshot[`snapshot 1`] = `
       },
       "eu-west-3": {
         FirehoseCidrBlock: "35.180.1.96/27",
+      },
+      "il-central-1": {
+        FirehoseCidrBlock: "51.16.102.0/27",
+      },
+      "me-central-1": {
+        FirehoseCidrBlock: "3.28.159.32/27",
       },
       "me-south-1": {
         FirehoseCidrBlock: "15.185.91.0/27",
@@ -229,23 +238,6 @@ snapshot[`snapshot 1`] = `
         ],
       },
       Type: "AWS::IAM::Policy",
-    },
-    FirehoseStreamServiceRole98797615: {
-      Properties: {
-        AssumeRolePolicyDocument: {
-          Statement: [
-            {
-              Action: "sts:AssumeRole",
-              Effect: "Allow",
-              Principal: {
-                Service: "firehose.amazonaws.com",
-              },
-            },
-          ],
-          Version: "2012-10-17",
-        },
-      },
-      Type: "AWS::IAM::Role",
     },
     MyLogGroup5C0DAD85: {
       DeletionPolicy: "Retain",
