@@ -1,24 +1,15 @@
 {
   "tasks": {
-    "cdk": "deno run --allow-all --allow-env npm:aws-cdk@2.102.0",
+    "cdk": "deno run --allow-all npm:aws-cdk@2.162.1",
     "test": "deno test --allow-env --allow-read=__snapshots__,/tmp --allow-write=__snapshots__,/tmp",
     "ci": "deno fmt --check && deno lint && deno task test"
   },
   "imports": {
-    "constructs": "npm:constructs@10.1.83",
-    "aws-cdk-lib": "npm:aws-cdk-lib@2.102.0",
-    "firehose": "npm:@aws-cdk/aws-kinesisfirehose-alpha@2.102.0-alpha.0",
-    "firehoseTo": "npm:@aws-cdk/aws-kinesisfirehose-destinations-alpha@2.102.0-alpha.0",
-    "deno_std/": "https://deno.land/std@0.204.0/"
+    "@aws-cdk/aws-kinesisfirehose-alpha": "npm:@aws-cdk/aws-kinesisfirehose-alpha@2.162.1-alpha.0",
+    "@aws-cdk/aws-kinesisfirehose-destinations-alpha": "npm:@aws-cdk/aws-kinesisfirehose-destinations-alpha@2.162.1-alpha.0",
+    "@std/testing": "jsr:@std/testing@1.0.3",
+    "aws-cdk-lib": "npm:aws-cdk-lib@2.162.1",
+    "constructs": "npm:constructs@^10.1.83"
   },
-  "lint": {
-    "files": {
-      "exclude": ["cdk.out"]
-    }
-  },
-  "fmt": {
-    "files": {
-      "exclude": ["cdk.out"]
-    }
-  }
+  "exclude": ["cdk.out", "__snapshots__"]
 }
